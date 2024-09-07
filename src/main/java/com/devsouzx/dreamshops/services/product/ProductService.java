@@ -53,7 +53,7 @@ public class ProductService implements IProductService {
         productRepository.findById(id)
                 .ifPresentOrElse(productRepository::delete,
                         () -> {throw new ProductNotFoundException("Product not found!");});
-e    }
+    }
 
     @Override
     public Product updateProduct(ProductUpdateRequest request, Long productId) {
