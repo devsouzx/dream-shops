@@ -21,8 +21,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ImageService implements IImageService {
-    private ImageRepository imageRepository;
-    private ProductRepository productRepository;
+    private final ImageRepository imageRepository;
+    private final ProductRepository productRepository;
 
     @Override
     public Image getImageById(Long id) {

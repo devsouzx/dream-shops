@@ -1,14 +1,18 @@
 package com.devsouzx.dreamshops.services.product;
 
+import com.devsouzx.dreamshops.dtos.ImageDTO;
+import com.devsouzx.dreamshops.dtos.ProductDTO;
 import com.devsouzx.dreamshops.exceptions.ProductNotFoundException;
 import com.devsouzx.dreamshops.model.Category;
 import com.devsouzx.dreamshops.model.Product;
 import com.devsouzx.dreamshops.repositories.CategoryRepository;
+import com.devsouzx.dreamshops.repositories.ImageRepository;
 import com.devsouzx.dreamshops.repositories.ProductRepository;
 import com.devsouzx.dreamshops.requests.AddProductRequest;
 import com.devsouzx.dreamshops.requests.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.modelmapper.ModelMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +20,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
-    private ProductRepository productRepository;
-    private CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
+    private final ImageRepository imageRepository;
 
     @Override
     public Product addProduct(AddProductRequest request) {
-
         Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
                 .orElseGet(() -> {
                     Category newCategory = new Category(request.getCategory().getName());
@@ -109,5 +114,21 @@ public class ProductService implements IProductService {
     @Override
     public Long countProductsByBrandAndName(String brand, String name) {
         return productRepository.countByBrandAndName(brand, name);
+    }
+
+    @Override
+    public List<ProductDTO> getConvertedProducts(List<Product> products) {
+        return products.stream().map(this::convertToDTO).toList();
+    }
+
+    @Override
+    public ProductDTO convertToDTO(Product product) {
+        ProductDTO productDto = modelMapper.map(product, ProductDTO.class);
+        List<ImageDTO> imageDTOs = imageRepository.findByProductId(product.getId())
+                .stream()
+                .map(image -> modelMapper.map(image, ImageDTO.class))
+                .toList();
+        productDto.setImages(imageDTOs);
+        return productDto;
     }
 }

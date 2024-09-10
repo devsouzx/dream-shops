@@ -1,5 +1,6 @@
 package com.devsouzx.dreamshops.services.product;
 
+import com.devsouzx.dreamshops.dtos.ProductDTO;
 import com.devsouzx.dreamshops.model.Product;
 import com.devsouzx.dreamshops.requests.AddProductRequest;
 import com.devsouzx.dreamshops.requests.ProductUpdateRequest;
@@ -18,4 +19,6 @@ public interface IProductService {
     List<Product> getProductsByName(String name);
     List<Product> getProductsByBrandAndName(String brand, String name);
     Long countProductsByBrandAndName(String brand, String name);
+    List<ProductDTO> getConvertedProducts(List<Product> products);
+    ProductDTO convertToDTO(Product product);
 }
