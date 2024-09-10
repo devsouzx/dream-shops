@@ -37,6 +37,7 @@ public class CategoryService implements ICategoryService {
                 .map(categoryRepository::save)
                 .orElseThrow(() -> new AlreadyExistsException(category.getName() + " already exists"));
     }
+
     @Override
     public Category updateCategory(Category category, Long id) {
         return Optional.ofNullable(getCategoryById(id)).map(oldCategory -> {
