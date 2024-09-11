@@ -8,10 +8,10 @@ import com.devsouzx.dreamshops.requests.ProductUpdateRequest;
 import java.util.List;
 
 public interface IProductService {
-    Product addProduct(AddProductRequest request);
+    Product addProduct(AddProductRequest product);
     Product getProductById(Long id);
     void deleteProductById(Long id);
-    Product updateProduct(ProductUpdateRequest request, Long productId);
+    Product updateProduct(ProductUpdateRequest product, Long productId);
     List<Product> getAllProducts();
     List<Product> getProductsByCategory(String category);
     List<Product> getProductsByBrand(String brand);

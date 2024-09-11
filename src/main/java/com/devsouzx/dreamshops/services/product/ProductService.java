@@ -3,7 +3,9 @@ package com.devsouzx.dreamshops.services.product;
 import com.devsouzx.dreamshops.dtos.ImageDTO;
 import com.devsouzx.dreamshops.dtos.ProductDTO;
 import com.devsouzx.dreamshops.exceptions.ProductNotFoundException;
+import com.devsouzx.dreamshops.exceptions.ResourceNotFoundException;
 import com.devsouzx.dreamshops.model.Category;
+import com.devsouzx.dreamshops.model.Image;
 import com.devsouzx.dreamshops.model.Product;
 import com.devsouzx.dreamshops.repositories.CategoryRepository;
 import com.devsouzx.dreamshops.repositories.ImageRepository;
@@ -50,14 +52,14 @@ public class ProductService implements IProductService {
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+                .orElseThrow(()-> new ResourceNotFoundException("Product not found!"));
     }
 
     @Override
     public void deleteProductById(Long id) {
         productRepository.findById(id)
                 .ifPresentOrElse(productRepository::delete,
-                        () -> {throw new ProductNotFoundException("Product not found!");});
+                        () -> {throw new ResourceNotFoundException("Product not found!");});
     }
 
     @Override
@@ -65,7 +67,7 @@ public class ProductService implements IProductService {
         return productRepository.findById(productId)
                 .map(existingProduct -> updateExistingProduct(existingProduct, request))
                 .map(productRepository::save)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+                .orElseThrow(()-> new ResourceNotFoundException("Product not found!"));
     }
 
     private Product updateExistingProduct(Product existingProduct, ProductUpdateRequest request) {
@@ -123,12 +125,12 @@ public class ProductService implements IProductService {
 
     @Override
     public ProductDTO convertToDTO(Product product) {
-        ProductDTO productDto = modelMapper.map(product, ProductDTO.class);
-        List<ImageDTO> imageDTOs = imageRepository.findByProductId(product.getId())
-                .stream()
+        ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+        List<Image> images = imageRepository.findByProductId(product.getId());
+        List<ImageDTO> imageDTOs = images.stream()
                 .map(image -> modelMapper.map(image, ImageDTO.class))
                 .toList();
-        productDto.setImages(imageDTOs);
-        return productDto;
+        productDTO.setImages(imageDTOs);
+        return productDTO;
     }
 }
