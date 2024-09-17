@@ -1,10 +1,13 @@
 package com.devsouzx.dreamshops.dtos;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 
+@Data
 public class OrderItemDTO {
-    private Long itemId;
+    private Long productId;
+    private String productName;
     private Integer quantity;
-    private BigDecimal unitPrice;
-    private ProductDTO product;
+    private BigDecimal price;
 }
