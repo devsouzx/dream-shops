@@ -17,8 +17,10 @@ public interface IProductService {
     List<Product> getProductsByBrand(String brand);
     List<Product> getProductsByCategoryAndBrand(String category, String brand);
     List<Product> getProductsByName(String name);
-    List<Product> getProductsByBrandAndName(String brand, String name);
+    List<Product> getProductsByBrandAndName(String category, String name);
     Long countProductsByBrandAndName(String brand, String name);
     List<ProductDTO> getConvertedProducts(List<Product> products);
     ProductDTO convertToDTO(Product product);
+    List<Product> findDistinctProductsByName();
+    List<String> getAllDistinctBrands();
 }
