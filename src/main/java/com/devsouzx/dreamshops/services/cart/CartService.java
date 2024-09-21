@@ -1,14 +1,19 @@
 package com.devsouzx.dreamshops.services.cart;
 
+import com.devsouzx.dreamshops.dtos.CartDTO;
 import com.devsouzx.dreamshops.exceptions.ResourceNotFoundException;
 import com.devsouzx.dreamshops.model.Cart;
+import com.devsouzx.dreamshops.model.User;
 import com.devsouzx.dreamshops.repositories.CartItemRepository;
 import com.devsouzx.dreamshops.repositories.CartRepository;
+import com.devsouzx.dreamshops.services.user.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
@@ -16,11 +21,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class CartService implements ICartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final AtomicLong cartIdGenerator = new AtomicLong(0);
+    private final ModelMapper modelMapper;
 
     @Override
-    public Cart getCart(Long id) {
-        Cart cart = cartRepository.findById(id)
+    public Cart getCart(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         BigDecimal totalAmount = cart.getTotalAmount();
         cart.setTotalAmount(totalAmount);
@@ -32,7 +37,7 @@ public class CartService implements ICartService {
     public void clearCart(Long id) {
         Cart cart = getCart(id);
         cartItemRepository.deleteAllByCartId(id);
-        cart.getItems().clear();
+        cart.clearCart();
         cartRepository.deleteById(id);
     }
 
@@ -43,15 +48,22 @@ public class CartService implements ICartService {
     }
 
     @Override
-    public Long initializeNewCart() {
-        Cart newCart = new Cart();
-        Long newCartId = cartIdGenerator.incrementAndGet();
-        newCart.setId(newCartId);
-        return cartRepository.save(newCart).getId();
+    public Cart initializeNewCart(User user) {
+        return Optional.ofNullable(getCartByUserId(user.getId()))
+                .orElseGet(() -> {
+                    Cart cart = new Cart();
+                    cart.setUser(user);
+                    return cartRepository.save(cart);
+                });
     }
 
     @Override
     public Cart getCartByUserId(Long userId) {
         return cartRepository.findByUserId(userId);
+    }
+
+    @Override
+    public CartDTO convertToDto(Cart cart){
+        return modelMapper.map(cart, CartDTO.class);
     }
 }

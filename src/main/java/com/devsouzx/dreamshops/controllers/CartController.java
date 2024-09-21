@@ -1,5 +1,6 @@
 package com.devsouzx.dreamshops.controllers;
 
+import com.devsouzx.dreamshops.dtos.CartDTO;
 import com.devsouzx.dreamshops.exceptions.ResourceNotFoundException;
 import com.devsouzx.dreamshops.model.Cart;
 import com.devsouzx.dreamshops.responses.ApiResponse;
@@ -18,11 +19,12 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class CartController {
     private final ICartService cartService;
 
-    @GetMapping("/{cartId}/my-cart")
-    public ResponseEntity<ApiResponse> getCart(@PathVariable Long cartId) {
+    @GetMapping("/user/{userId}/my-cart")
+    public ResponseEntity<ApiResponse> getUserCart(@PathVariable Long userId) {
         try {
-            Cart cart = cartService.getCart(cartId);
-            return ResponseEntity.ok(new ApiResponse("Success", cart));
+            Cart cart = cartService.getCartByUserId(userId);
+            CartDTO cartDto = cartService.convertToDto(cart);
+            return ResponseEntity.ok(new ApiResponse("Success", cartDto));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }

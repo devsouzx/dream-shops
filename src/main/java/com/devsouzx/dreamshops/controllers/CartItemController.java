@@ -1,14 +1,19 @@
 package com.devsouzx.dreamshops.controllers;
 
 import com.devsouzx.dreamshops.exceptions.ResourceNotFoundException;
+import com.devsouzx.dreamshops.model.Cart;
+import com.devsouzx.dreamshops.model.User;
 import com.devsouzx.dreamshops.responses.ApiResponse;
 import com.devsouzx.dreamshops.services.cart.ICartItemService;
 import com.devsouzx.dreamshops.services.cart.ICartService;
+import com.devsouzx.dreamshops.services.user.IUserService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RequiredArgsConstructor
 @RestController
@@ -16,19 +21,21 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class CartItemController {
     private final ICartItemService cartItemService;
     private final ICartService cartService;
+    private final IUserService userService;
 
     @PostMapping("/item/add")
-    public ResponseEntity<ApiResponse> addItemToCart(@RequestParam(required = false) Long cartId,
-                                                     @RequestParam Long productId,
-                                                     @RequestParam Integer quantity) {
+    public ResponseEntity<ApiResponse> addItemToCart(
+            @RequestParam Long productId,
+            @RequestParam Integer quantity) {
         try {
-            if (cartId == null) {
-                cartId = cartService.initializeNewCart();
-            }
-            cartItemService.addItemToCart(cartId, productId, quantity);
-            return ResponseEntity.ok(new ApiResponse("Add Item Success", null));
+            User user = userService.getAuthenticatedUser();
+            Cart cart = cartService.initializeNewCart(user);
+            cartItemService.addItemToCart(cart.getId(), productId, quantity);
+            return ResponseEntity.ok(new ApiResponse("Item added to cart successfully", null));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        } catch (JwtException e){
+            return  ResponseEntity.status(UNAUTHORIZED).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
